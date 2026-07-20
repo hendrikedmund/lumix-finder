@@ -1,28 +1,28 @@
 # Lumix S1 II Finder
 
-Ein kleiner Windows-Suchmonitor für gebrauchte **Panasonic Lumix S1 II** in Deutschland. Er durchsucht Kleinanzeigen und eBay, sortiert nach Gesamtpreis und erzeugt einen übersichtlichen lokalen Report.
+Ein kleiner Suchmonitor für neue und gebrauchte **Panasonic Lumix S1 II** in Deutschland. Er durchsucht Kleinanzeigen, eBay, mehrere deutsche Fotohändler und Preisvergleiche, sortiert nach Gesamtpreis und erzeugt einen übersichtlichen Report.
 
-Die Modellprüfung akzeptiert übliche Schreibweisen (`S1 II`, `S1II`, `S1 2`, `S1MK2`) und verwirft bewusst ähnliche Modelle wie `S1R II`, `S5 II`, `S1H` und `S1 IIE`. Auch Zubehör-, Gesuch- und Mietanzeigen werden herausgefiltert.
+Die Modellprüfung akzeptiert übliche Schreibweisen (`S1 II`, `S1II`, `S1 2`, `S1MK2`) und verwirft bewusst ähnliche Modelle wie `S1R II`, `S5 II`, `S1H` und `S1 IIE`. Auch Zubehör-, Gesuch- und Mietanzeigen werden herausgefiltert. Online werden Kleinanzeigen, eBay, Calumet, Foto Koch, Foto Erhardt, Kamera Fotohaus, DSV24, Geizhals und Idealo geprüft.
 
 ## Online auf Handy und anderen Geräten
 
 Die enthaltene GitHub-Actions-Konfiguration erzeugt alle sechs Stunden eine öffentliche GitHub-Pages-Seite. Du brauchst dafür lediglich ein GitHub-Konto:
 
-1. Auf GitHub ein leeres Repository anlegen, beispielsweise `lumix-search`.
+1. Auf GitHub ein leeres Repository anlegen, beispielsweise `lumix-finder`.
 2. In diesem Ordner einmalig ausführen (die Repository-URL entsprechend ersetzen):
 
    ```powershell
    git add .
    git commit -m "Lumix S1 II Finder"
    git branch -M main
-   git remote add origin https://github.com/DEIN-NAME/lumix-search.git
+   git remote add origin https://github.com/DEIN-NAME/lumix-finder.git
    git push -u origin main
    ```
 
 3. Auf GitHub unter **Settings → Pages** bei **Source** den Eintrag **GitHub Actions** auswählen, falls er nicht bereits automatisch aktiv ist.
 4. Unter **Actions** den Workflow **Angebote aktualisieren und veröffentlichen** öffnen und einmal **Run workflow** wählen.
 
-Nach dem ersten erfolgreichen Lauf ist die Seite normalerweise unter `https://DEIN-NAME.github.io/lumix-search/` erreichbar. Der geplante Lauf startet jeweils bei Minute 17 alle sechs Stunden; über **Run workflow** kannst du jederzeit manuell aktualisieren.
+Nach dem ersten erfolgreichen Lauf ist deine Seite unter `https://hendrikedmund.github.io/lumix-finder/` erreichbar. Der geplante Lauf startet jeweils bei Minute 17 alle sechs Stunden; über **Run workflow** kannst du jederzeit manuell aktualisieren.
 
 GitHub Actions verwendet den plattformunabhängigen Generator in `web/generate.mjs`. `npm test` prüft vor jeder Veröffentlichung automatisch Modellfilter und Parser. Wenn ein Marktplatz Zugriffe aus einem Rechenzentrum blockiert, erscheint der Fehler transparent auf der Seite und die übrigen Quellen bleiben nutzbar.
 

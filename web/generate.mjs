@@ -48,7 +48,7 @@ export function parseKleinanzeigen(html, config) {
     const href = one(body, /data-href="([^"]+)"/i);
     const id = one(body, /data-adid="(\d+)"/i);
     return [{
-      id: `kleinanzeigen-${id}`, source: "Kleinanzeigen", title, price, shipping: null, totalPrice: price,
+      id: `kleinanzeigen-${id}`, source: "Kleinanzeigen", title, price, shipping: null, totalPrice: price, condition: "Gebraucht/privat",
       location: htmlText(one(body, /aditem-main--top--left[^>]*>([\s\S]*?)<\/div>/i)),
       date: htmlText(one(body, /aditem-main--top--right[^>]*>([\s\S]*?)<\/div>/i)),
       description: htmlText(one(body, /aditem-main--middle--description[^>]*>([\s\S]*?)<\/p>/i)),
@@ -73,10 +73,47 @@ export function parseEbay(html, config) {
     const url = htmlText(link[1]).replace(/\?.*$/, "");
     return [{
       id: `ebay-${one(url, /\/itm\/(?:[^/]+\/)?(\d+)/i)}`, source: "eBay", title, price, shipping,
-      totalPrice: price + (shipping || 0), location: htmlText(one(body, /s-item__location[^>]*>([\s\S]*?)<\/span>/i)),
+      totalPrice: price + (shipping || 0), location: htmlText(one(body, /s-item__location[^>]*>([\s\S]*?)<\/span>/i)), condition: "Gebraucht",
       date: "", description: shippingText, url, image: one(body, /<img[^>]+src="(https:[^"]+)"/i)
     }];
   });
+}
+
+function machinePrice(value = "") {
+  const normalized = String(value).trim().replace(/\s/g, "");
+  if (/^\d{1,5}\.\d{2}$/.test(normalized)) return Number(normalized);
+  return parsePrice(`${normalized} EUR`);
+}
+
+export function parseProductPage(html, config, source, url) {
+  const title = htmlText(
+    one(html, /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) ||
+    one(html, /<h1[^>]*>([\s\S]*?)<\/h1>/i) ||
+    one(html, /<title[^>]*>([\s\S]*?)<\/title>/i)
+  );
+  if (!isExactModel(title, true)) return [];
+  if (/outofstock|soldout|nicht\s+(?:mehr\s+)?verfügbar|derzeit\s+nicht\s+lieferbar/i.test(html) &&
+      !/instock|sofort\s+lieferbar|auf\s+lager/i.test(html)) return [];
+
+  const candidates = [
+    one(html, /<meta[^>]+(?:itemprop=["']price["']|property=["'](?:product|og):price:amount["'])[^>]+content=["']([\d.,]+)["']/i),
+    one(html, /<meta[^>]+content=["']([\d.,]+)["'][^>]+(?:itemprop=["']price["']|property=["'](?:product|og):price:amount["'])/i),
+    one(html, /["'](?:lowPrice|price)["']\s*:\s*["']?([\d.]+(?:,\d{2})?)/i),
+    one(html, /Sie\s+zahlen\s+(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/i),
+    one(html, /(?:ab\s*)?(?:€|&euro;|&#\d+;)\s*(\d{1,3}(?:[.\s]\d{3})*(?:,\d{2})?)/i)
+  ].filter(Boolean);
+  const prices = candidates.map(machinePrice).filter(p => Number.isFinite(p) && p >= 500 && p <= 10_000);
+  if (!prices.length) return [];
+  // Candidates are ordered from structured product metadata to weaker text
+  // fallbacks. Choosing the first valid one avoids unrelated accessory prices.
+  const price = prices[0];
+  if (price > config.maxPrice) return [];
+  const image = htmlText(one(html, /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i));
+  return [{
+    id: `shop-${source.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`, source, title, price,
+    shipping: null, totalPrice: price, location: "Deutschland", date: "", condition: "Neu",
+    description: "Neuware vom Händler – Verfügbarkeit und Endpreis im Shop prüfen.", url, image
+  }];
 }
 
 async function fetchPage(url) {
@@ -97,7 +134,7 @@ const esc = (value = "") => String(value).replace(/[&<>"']/g, c => ({"&":"&amp;"
 export function renderPage(payload, config) {
   const cards = payload.offers.map(o => `<article class="card">
     <a class="photo" href="${esc(o.url)}" target="_blank" rel="noopener">${o.image ? `<img src="${esc(o.image)}" alt="" loading="lazy">` : `<span>S1 II</span>`}</a>
-    <div class="content"><div class="meta"><b>${esc(o.source)}</b><span>${esc(o.location)}</span></div>
+    <div class="content"><div class="meta"><b>${esc(o.source)}${o.condition ? ` · ${esc(o.condition)}` : ""}</b><span>${esc(o.location)}</span></div>
     <h2><a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.title)}</a></h2>
     <div class="price">${o.price.toLocaleString("de-DE")} € ${o.shipping == null ? "" : `<small>${o.shipping ? `+ ${o.shipping.toLocaleString("de-DE")} € Versand` : "Versand kostenlos"}</small>`}</div>
     <p>${esc(o.description)}</p><time>${esc(o.date)}</time></div></article>`).join("\n");
@@ -110,18 +147,25 @@ export function renderPage(payload, config) {
 export async function generate({ fixtureDirectory } = {}) {
   const config = JSON.parse(await readFile(path.join(root, "config.json"), "utf8"));
   const sources = [
-    ["Kleinanzeigen", "https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1-ii/k0c245", "kleinanzeigen.html", parseKleinanzeigen],
-    ["Kleinanzeigen", "https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1/k0c245", "kleinanzeigen-breit.html", parseKleinanzeigen],
-    ["eBay", "https://www.ebay.de/sch/i.html?_nkw=panasonic+lumix+s1+ii&_sacat=31388&LH_PrefLoc=1&LH_ItemCondition=3000&_sop=15", "ebay.html", parseEbay]
-  ].filter(([name]) => config.sources[name === "Kleinanzeigen" ? "kleinanzeigen" : "ebay"]);
+    { key: "kleinanzeigen", name: "Kleinanzeigen", url: "https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1-ii/k0c245", fixture: "kleinanzeigen.html", parser: parseKleinanzeigen },
+    { key: "kleinanzeigen", name: "Kleinanzeigen", url: "https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1/k0c245", fixture: "kleinanzeigen-breit.html", parser: parseKleinanzeigen },
+    { key: "ebay", name: "eBay", url: "https://www.ebay.de/sch/i.html?_nkw=panasonic+lumix+s1+ii&_sacat=31388&LH_PrefLoc=1&LH_ItemCondition=3000&_sop=15", fixture: "ebay.html", parser: parseEbay },
+    { key: "calumet", name: "Calumet", url: "https://www.calumet.de/product/panasonic-lumix-s1ii", fixture: "shop.html", product: true },
+    { key: "fotokoch", name: "Foto Koch", url: "https://www.fotokoch.de/Panasonic-Lumix-DC-S1II-Gehaeuse-L-Mount_37884.html", fixture: "shop.html", product: true },
+    { key: "fotoerhardt", name: "Foto Erhardt", url: "https://www.foto-erhardt.de/kameras/systemkameras/panasonic-pro-s/panasonic-lumix-dc-s1ii-plus-sigma-28-70mm-f2-8-dg-dn-c-l-mount.html", fixture: "shop.html", product: true },
+    { key: "kamerafotohaus", name: "Kamera Fotohaus", url: "https://www.kamera-fotohaus.de/produkte/kameras/systemkameras/panasonic-2/lumix-s-serie/lumix-dc-s1-ii-gehause-50448", fixture: "shop.html", product: true },
+    { key: "dsv24", name: "DSV24", url: "https://www.dsv24.de/Panasonic-Lumix-DC-S1II-Gehaeuse-L-Mount_37884.html", fixture: "shop.html", product: true },
+    { key: "geizhals", name: "Geizhals", url: "https://geizhals.de/panasonic-lumix-dc-s1ii-v198862.html", fixture: "shop.html", product: true },
+    { key: "idealo", name: "Idealo", url: "https://www.idealo.de/preisvergleich/OffersOfProduct/206513069_-lumix-dc-s1ii-panasonic.html", fixture: "shop.html", product: true }
+  ].filter(source => config.sources[source.key]);
   const errors = [], offers = [];
-  for (const [name, url, fixture, parser] of sources) {
+  for (const source of sources) {
     try {
-      const file = fixtureDirectory && path.join(fixtureDirectory, fixture);
-      if (file && fixture === "kleinanzeigen-breit.html") continue;
-      const html = file ? await readFile(file, "utf8") : await fetchPage(url);
-      offers.push(...parser(html, config));
-    } catch (error) { errors.push(`${name}: ${error.message}`); }
+      const file = fixtureDirectory && path.join(fixtureDirectory, source.fixture);
+      if (file && source.fixture === "kleinanzeigen-breit.html") continue;
+      const html = file ? await readFile(file, "utf8") : await fetchPage(source.url);
+      offers.push(...(source.product ? parseProductPage(html, config, source.name, source.url) : source.parser(html, config)));
+    } catch (error) { errors.push(`${source.name}: ${error.message}`); }
   }
   const unique = [...new Map(offers.map(o => [o.id, o])).values()].sort((a, b) => a.totalPrice - b.totalPrice);
   const payload = { updatedAt: new Date().toISOString(), offers: unique, errors: [...new Set(errors)] };

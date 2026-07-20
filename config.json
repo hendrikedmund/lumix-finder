@@ -1,8 +1,15 @@
 {
   "maxPrice": 3000,
-  "includeNew": false,
+  "includeNew": true,
   "sources": {
     "kleinanzeigen": true,
-    "ebay": true
+    "ebay": true,
+    "calumet": true,
+    "fotokoch": true,
+    "fotoerhardt": true,
+    "kamerafotohaus": true,
+    "dsv24": true,
+    "geizhals": true,
+    "idealo": true
   }
 }

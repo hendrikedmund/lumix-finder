@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isExactModel, parsePrice, parseKleinanzeigen, parseEbay } from "./generate.mjs";
+import { isExactModel, parsePrice, parseKleinanzeigen, parseEbay, parseProductPage } from "./generate.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const fixture = name => readFile(path.join(root, "tests", "fixtures", name), "utf8");
@@ -26,4 +26,11 @@ test("liest Marktplatz-Karten und verwirft falsche Modelle", async () => {
   assert.equal(ebay.length, 1);
   assert.equal(kleinanzeigen[0].price, 2399);
   assert.equal(ebay[0].price, 2499);
+});
+
+test("liest Neuware von Händler-Produktseiten", async () => {
+  const offers = parseProductPage(await fixture("shop.html"), config, "Fotohändler", "https://shop.example/s1ii");
+  assert.equal(offers.length, 1);
+  assert.equal(offers[0].price, 2999);
+  assert.equal(offers[0].condition, "Neu");
 });
