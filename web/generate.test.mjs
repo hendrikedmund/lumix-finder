@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isExactModel, parsePrice, parseKleinanzeigen, parseEbay, parseProductPage } from "./generate.mjs";
+import { isExactModel, parsePrice, parseKleinanzeigen, parseEbay, parseProductPage, renderPage } from "./generate.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const fixture = name => readFile(path.join(root, "tests", "fixtures", name), "utf8");
@@ -33,4 +33,12 @@ test("liest Neuware von Händler-Produktseiten", async () => {
   assert.equal(offers.length, 1);
   assert.equal(offers[0].price, 2999);
   assert.equal(offers[0].condition, "Neu");
+});
+
+test("zeigt Quellenfehler verständlich und eingeklappt", () => {
+  const html = renderPage({ updatedAt: new Date().toISOString(), offers: [], errors: ["eBay: HTTP 403", "Idealo: HTTP 503"] }, config);
+  assert.match(html, /<details class="source-status">/);
+  assert.match(html, /eBay: Zugriff blockiert/);
+  assert.match(html, /Idealo: vorübergehend nicht erreichbar/);
+  assert.doesNotMatch(html, /<aside>/);
 });
