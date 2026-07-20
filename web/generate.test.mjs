@@ -42,3 +42,15 @@ test("zeigt Quellenfehler verständlich und eingeklappt", () => {
   assert.match(html, /Idealo: vorübergehend nicht erreichbar/);
   assert.doesNotMatch(html, /<aside>/);
 });
+
+test("rendert entspannte einspaltige Angebotskarten auf Mobilgeräten", () => {
+  const payload = { updatedAt: new Date().toISOString(), errors: [], offers: [{
+    id: "mobile-1", source: "Kleinanzeigen", condition: "Gebraucht", title: "Lumix S1 II wie neu",
+    price: 2700, shipping: null, location: "Berlin", description: "Mit OVP", date: "Heute",
+    url: "https://example.com/angebot", image: "https://example.com/kamera.jpg"
+  }] };
+  const html = renderPage(payload, config);
+  assert.match(html, /@media\(max-width:650px\).*?\.card\{grid-template-columns:1fr/s);
+  assert.match(html, /class="offer-link"[^>]*>Angebot öffnen/);
+  assert.match(html, /neu &amp; gebraucht/);
+});
