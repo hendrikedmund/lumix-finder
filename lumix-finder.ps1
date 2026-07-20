@@ -67,7 +67,8 @@ function Get-KleinanzeigenOffers {
     # title filter below rejects S1R/S5 suggestions mixed into either result page.
     $searches = @(
         @{ Url = 'https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1-ii/k0c245'; Fixture = 'kleinanzeigen.html' },
-        @{ Url = 'https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1/k0c245'; Fixture = 'kleinanzeigen-breit.html' }
+        @{ Url = 'https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1/k0c245'; Fixture = 'kleinanzeigen-breit.html' },
+        @{ Url = 'https://www.kleinanzeigen.de/s-multimedia-elektronik/lumix-s1/k0c161'; Fixture = 'kleinanzeigen-breit.html' }
     )
     if ($FixtureDirectory -and -not (Test-Path -LiteralPath (Join-Path $FixtureDirectory 'kleinanzeigen-breit.html'))) {
         $searches = @($searches[0])

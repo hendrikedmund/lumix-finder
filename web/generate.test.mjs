@@ -10,7 +10,7 @@ const fixture = name => readFile(path.join(root, "tests", "fixtures", name), "ut
 const config = { maxPrice: 3000, includeNew: false };
 
 test("erkennt ausschließlich die S1 II", () => {
-  for (const title of ["Panasonic Lumix S1 II Body", "Lumix S1II Kamera", "Panasonic S1MK2 Gehäuse", "Panasonic S1 2 Vollformat"]) assert.equal(isExactModel(title), true, title);
+  for (const title of ["Panasonic Lumix S1 II Body", "Lumix S1II Kamera", "Panasonic S1MK2 Gehäuse", "Panasonic S1 2 Vollformat", "Lumix S1ii wie NEU 2 Monate alt mit Zubehör"]) assert.equal(isExactModel(title, true), true, title);
   for (const title of ["Lumix S1R II", "Panasonic S5 II", "Lumix S1 IIE", "Cage für Lumix S1 II", "Suche Panasonic S1 II"]) assert.equal(isExactModel(title), false, title);
 });
 

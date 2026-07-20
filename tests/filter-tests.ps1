@@ -9,6 +9,7 @@ $cases = @(
     @('Panasonic LUMIX S1II (S12) S1 II WIE NEU', $true),
     @('Panasonic Lumix S1MK2 Kamera', $true),
     @('Panasonic Lumix S1 2 Gehäuse', $true),
+    @('Lumix S1ii wie NEU 2 Monate alt mit Zubehör', $true),
     @('Panasonic Lumix S1R II Body', $false),
     @('Panasonic Lumix S5 II Kamera', $false),
     @('Panasonic Lumix S1 IIE', $false),

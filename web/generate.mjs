@@ -149,6 +149,7 @@ export async function generate({ fixtureDirectory } = {}) {
   const sources = [
     { key: "kleinanzeigen", name: "Kleinanzeigen", url: "https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1-ii/k0c245", fixture: "kleinanzeigen.html", parser: parseKleinanzeigen },
     { key: "kleinanzeigen", name: "Kleinanzeigen", url: "https://www.kleinanzeigen.de/s-foto/panasonic-lumix-s1/k0c245", fixture: "kleinanzeigen-breit.html", parser: parseKleinanzeigen },
+    { key: "kleinanzeigen", name: "Kleinanzeigen", url: "https://www.kleinanzeigen.de/s-multimedia-elektronik/lumix-s1/k0c161", fixture: "kleinanzeigen-breit.html", parser: parseKleinanzeigen },
     { key: "ebay", name: "eBay", url: "https://www.ebay.de/sch/i.html?_nkw=panasonic+lumix+s1+ii&_sacat=31388&LH_PrefLoc=1&LH_ItemCondition=3000&_sop=15", fixture: "ebay.html", parser: parseEbay },
     { key: "calumet", name: "Calumet", url: "https://www.calumet.de/product/panasonic-lumix-s1ii", fixture: "shop.html", product: true },
     { key: "fotokoch", name: "Foto Koch", url: "https://www.fotokoch.de/Panasonic-Lumix-DC-S1II-Gehaeuse-L-Mount_37884.html", fixture: "shop.html", product: true },
