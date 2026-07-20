@@ -34,7 +34,7 @@ Der Finder kann über [ntfy](https://ntfy.sh) bei neuen Angebots-IDs eine Push-N
 2. Erzeuge einen langen, nicht erratbaren Kanalnamen, beispielsweise mit einem Passwortgenerator. Beispielaufbau: `lumix-h7K2p9Qx4mN8vR3s` – verwende nicht genau dieses öffentliche Beispiel.
 3. Öffne ntfy, tippe auf **+** beziehungsweise **Thema abonnieren**, trage deinen Kanalnamen ein und abonniere ihn über den Server `https://ntfy.sh`.
 4. Öffne auf GitHub das Repository `hendrikedmund/lumix-finder` und gehe zu **Settings → Secrets and variables → Actions**.
-5. Wähle **New repository secret**. Als Namen exakt `NTFY_TOPIC` und als Wert deinen geheimen Kanalnamen eintragen.
+5. Wähle **New repository secret**. Als Namen exakt `NTFY_TOPIC` und als Wert nur deinen geheimen Kanalnamen eintragen, beispielsweise `lumix-a1b2c3d4`. Die vollständige Adresse `https://ntfy.sh/...` ist ebenfalls zulässig, aber der reine Kanalname ist übersichtlicher.
 6. Starte unter **Actions → Angebote aktualisieren und veröffentlichen → Run workflow** einen manuellen Lauf. Dabei wird immer eine Nachricht **„Lumix Finder ist verbunden“** verschickt. Die automatischen Sechs-Stunden-Läufe melden danach ausschließlich neue Angebote.
 
 Der Kanalname sollte wie ein Passwort behandelt werden: Öffentliche ntfy-Themen können von Personen gelesen oder beschrieben werden, die den Namen kennen. Der Wert steht deshalb ausschließlich im verschlüsselten GitHub-Secret und nicht im Repository.

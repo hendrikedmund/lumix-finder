@@ -16,6 +16,25 @@ export function mergeSeenIds(current, previous) {
   ].filter(Boolean))].slice(-2000);
 }
 
+export function normalizeTopic(value = "") {
+  let topic = String(value).trim();
+  if (/^https?:\/\//i.test(topic)) {
+    const parsed = new URL(topic);
+    topic = decodeURIComponent(parsed.pathname.split("/").filter(Boolean).at(-1) || "");
+  }
+  topic = topic.replace(/^\/+|\/+$/g, "").trim();
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(topic)) {
+    throw new Error("NTFY_TOPIC ist ungültig. Trage nur den Kanalnamen ein, z. B. lumix-a1b2c3d4 (keine Leerzeichen)."
+    );
+  }
+  return topic;
+}
+
+async function ntfyError(response) {
+  const detail = (await response.text()).trim();
+  return new Error(`ntfy HTTP ${response.status}${detail ? `: ${detail}` : ""}`);
+}
+
 async function getPrevious(url) {
   if (!url) return { offers: [], seenIds: [] };
   try {
@@ -41,7 +60,7 @@ async function sendPush(offer, topic, server) {
       tags: ["camera", "moneybag"]
     })
   });
-  if (!response.ok) throw new Error(`ntfy HTTP ${response.status}`);
+  if (!response.ok) throw await ntfyError(response);
 }
 
 async function sendTestPush(topic, server) {
@@ -57,17 +76,18 @@ async function sendTestPush(topic, server) {
       tags: ["white_check_mark", "camera"]
     })
   });
-  if (!response.ok) throw new Error(`ntfy HTTP ${response.status}`);
+  if (!response.ok) throw await ntfyError(response);
 }
 
 export async function notify() {
   const dataPath = path.join(root, "public", "angebote.json");
   const current = JSON.parse(await readFile(dataPath, "utf8"));
-  const topic = process.env.NTFY_TOPIC?.trim();
-  if (!topic) {
+  const topicValue = process.env.NTFY_TOPIC?.trim();
+  if (!topicValue) {
     console.log("NTFY_TOPIC ist nicht eingerichtet; Push-Benachrichtigungen werden übersprungen.");
     return { sent: 0, skipped: true };
   }
+  const topic = normalizeTopic(topicValue);
 
   const server = (process.env.NTFY_SERVER || "https://ntfy.sh").replace(/\/$/, "");
   const testRequested = /^(?:1|true|yes)$/i.test(process.env.NTFY_TEST || "");
