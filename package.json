@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "generate": "node web/generate.mjs",
-    "test": "node --test web/generate.test.mjs"
+    "test": "node --test web/*.test.mjs"
   },
   "engines": {
     "node": ">=20"

@@ -26,6 +26,12 @@ jobs:
           node-version: 22
       - run: npm test
       - run: npm run generate
+      - name: Push bei neuen Angeboten senden
+        run: node web/notify.mjs
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_TEST: ${{ github.event_name == 'workflow_dispatch' }}
+          PREVIOUS_OFFERS_URL: https://hendrikedmund.github.io/lumix-finder/angebote.json
       - uses: actions/configure-pages@v5
         with:
           enablement: true

@@ -26,6 +26,19 @@ Nach dem ersten erfolgreichen Lauf ist deine Seite unter `https://hendrikedmund.
 
 GitHub Actions verwendet den plattformunabhängigen Generator in `web/generate.mjs`. `npm test` prüft vor jeder Veröffentlichung automatisch Modellfilter und Parser. Wenn ein Marktplatz Zugriffe aus einem Rechenzentrum blockiert, erscheint der Fehler transparent auf der Seite und die übrigen Quellen bleiben nutzbar.
 
+## Push-Benachrichtigungen aufs Handy
+
+Der Finder kann über [ntfy](https://ntfy.sh) bei neuen Angebots-IDs eine Push-Nachricht mit Preis, Quelle und direktem Link senden. Bereits gemeldete Angebote werden gespeichert und nicht bei jedem Lauf erneut geschickt.
+
+1. Installiere die App **ntfy** aus dem Google Play Store, Apple App Store oder über F-Droid.
+2. Erzeuge einen langen, nicht erratbaren Kanalnamen, beispielsweise mit einem Passwortgenerator. Beispielaufbau: `lumix-h7K2p9Qx4mN8vR3s` – verwende nicht genau dieses öffentliche Beispiel.
+3. Öffne ntfy, tippe auf **+** beziehungsweise **Thema abonnieren**, trage deinen Kanalnamen ein und abonniere ihn über den Server `https://ntfy.sh`.
+4. Öffne auf GitHub das Repository `hendrikedmund/lumix-finder` und gehe zu **Settings → Secrets and variables → Actions**.
+5. Wähle **New repository secret**. Als Namen exakt `NTFY_TOPIC` und als Wert deinen geheimen Kanalnamen eintragen.
+6. Starte unter **Actions → Angebote aktualisieren und veröffentlichen → Run workflow** einen manuellen Lauf. Dabei wird immer eine Nachricht **„Lumix Finder ist verbunden“** verschickt. Die automatischen Sechs-Stunden-Läufe melden danach ausschließlich neue Angebote.
+
+Der Kanalname sollte wie ein Passwort behandelt werden: Öffentliche ntfy-Themen können von Personen gelesen oder beschrieben werden, die den Namen kennen. Der Wert steht deshalb ausschließlich im verschlüsselten GitHub-Secret und nicht im Repository.
+
 ## Lokale Benutzung unter Windows
 
 Im Explorer Rechtsklick auf `lumix-finder.ps1` → **Mit PowerShell ausführen**. Alternativ im Terminal:
