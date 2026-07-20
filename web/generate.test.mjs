@@ -51,7 +51,10 @@ test("rendert entspannte einspaltige Angebotskarten auf Mobilgeräten", () => {
   }] };
   const html = renderPage(payload, config);
   assert.match(html, /@media\(max-width:650px\).*?\.card\{display:flex;flex-direction:column;background:transparent/s);
-  assert.match(html, /\.photo\{order:1;[^}]*aspect-ratio:16\/10[^}]*border-radius:19px 19px 0 0/s);
+  assert.match(html, /class="photo has-image"/);
+  assert.match(html, /\.photo\.has-image\{[^}]*aspect-ratio:auto/s);
+  assert.match(html, /\.photo\.has-image img\{[^}]*width:100%;height:auto[^}]*object-fit:contain/s);
+  assert.match(html, /\.photo\.no-image\{[^}]*aspect-ratio:16\/10/s);
   assert.match(html, /\.content\{order:2;[^}]*background:#fff[^}]*border-radius:0 0 19px 19px/s);
   assert.match(html, /class="offer-link"[^>]*>Angebot öffnen/);
   assert.match(html, /neu &amp; gebraucht/);
