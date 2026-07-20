@@ -1,0 +1,8 @@
+{
+  "maxPrice": 3000,
+  "includeNew": false,
+  "sources": {
+    "kleinanzeigen": true,
+    "ebay": true
+  }
+}

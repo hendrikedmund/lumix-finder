@@ -1,0 +1,29 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { isExactModel, parsePrice, parseKleinanzeigen, parseEbay } from "./generate.mjs";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const fixture = name => readFile(path.join(root, "tests", "fixtures", name), "utf8");
+const config = { maxPrice: 3000, includeNew: false };
+
+test("erkennt ausschließlich die S1 II", () => {
+  for (const title of ["Panasonic Lumix S1 II Body", "Lumix S1II Kamera", "Panasonic S1MK2 Gehäuse", "Panasonic S1 2 Vollformat"]) assert.equal(isExactModel(title), true, title);
+  for (const title of ["Lumix S1R II", "Panasonic S5 II", "Lumix S1 IIE", "Cage für Lumix S1 II", "Suche Panasonic S1 II"]) assert.equal(isExactModel(title), false, title);
+});
+
+test("liest deutsche Preise", () => {
+  assert.equal(parsePrice("2.399 € VB"), 2399);
+  assert.equal(parsePrice("EUR 2.499,00"), 2499);
+});
+
+test("liest Marktplatz-Karten und verwirft falsche Modelle", async () => {
+  const kleinanzeigen = parseKleinanzeigen(await fixture("kleinanzeigen.html"), config);
+  const ebay = parseEbay(await fixture("ebay.html"), config);
+  assert.equal(kleinanzeigen.length, 1);
+  assert.equal(ebay.length, 1);
+  assert.equal(kleinanzeigen[0].price, 2399);
+  assert.equal(ebay[0].price, 2499);
+});
